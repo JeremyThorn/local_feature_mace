@@ -411,6 +411,8 @@ def run(args: argparse.Namespace) -> None:
         atomic_energies = None
         atomic_targets = torch.Tensor(dict_to_array(atomic_targets_dict, heads))
         atomic_scales = torch.Tensor(dict_to_array(atomic_scales_dict, heads))
+        args.mean = atomic_targets
+        args.std = atomic_scales
         dipole_only = False
         targets_only = True
         args.compute_dipole = False
