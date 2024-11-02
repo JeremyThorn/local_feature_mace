@@ -356,14 +356,14 @@ def get_atomic_targets(train_collection, z_table) -> Tuple[Dict, float]:
     # catch if colections.train not defined above
     try:
         assert train_collection is not None
-        atomic_targets_dict = data.compute_average_atomic_targets(
+        atomic_targets_dict, atomic_scales_dict = data.compute_average_atomic_targets(
             train_collection, z_table
         )
     except Exception as e:
         raise RuntimeError(
             f"Could not compute average atomic targets if no training xyz given, error {e} occured"
         ) from e
-    return atomic_targets_dict
+    return atomic_targets_dict, atomic_scales_dict
 
 def get_avg_num_neighbors(head_configs, args, train_loader, device):
     if all(head_config.compute_avg_num_neighbors for head_config in head_configs):

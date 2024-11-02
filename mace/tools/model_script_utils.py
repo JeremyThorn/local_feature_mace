@@ -10,7 +10,7 @@ from mace.tools.scripts_utils import extract_config_mace_model
 
 
 def configure_model(
-    args, train_loader, atomic_energies, model_foundation=None, heads=None, z_table=None
+    args, train_loader, atomic_energies, atomic_targets, atomic_scales, model_foundation=None, heads=None, z_table=None
 ):
     # Selecting outputs
     compute_virials = args.loss in ("stress", "virials", "huber", "universal")
@@ -38,10 +38,11 @@ def configure_model(
             train_loader, atomic_energies
         )
     elif args.model == "AtomicTargetsMACE":
-        _, args.std = modules.scaling_classes[args.scaling](
-            train_loader, z_table
-        )
-        args.mean = 0.0
+        #_, args.std = modules.scaling_classes[args.scaling](
+        #    train_loader, z_table
+        #)
+        args.mean = atomic_targets
+        args.std = atomic_scales
         atomic_energies = 0.0
 
     # Build model

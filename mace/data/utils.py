@@ -348,25 +348,23 @@ def compute_average_atomic_targets(
     Function to compute the average node target and node std of each chemical element
     returns a dictionary with averages and a float scale
     """
-    len_train = len(collections_train)
-    len_zs = len(z_table)
+
     elementwise_targets = {}
-    for i in range(len_train):
-        for j in range(len(collections_train[i].atomic_numbers)):
-            z = collections_train[i].atomic_numbers[j]
+    for config in collections_train:
+        for i, z in enumerate(z_table.zs):
+            z_targets = config.atomic_targets[config.atomic_numbers == z]
             if z not in elementwise_targets.keys():
                 elementwise_targets[z] = []
-            elementwise_targets[z].append(collections_train[i].atomic_targets[j])
-
+            elementwise_targets[z].append(z_targets)
 
     atomic_energies_dict = {}
-    atomic_scales = []
-    for i, z in enumerate(z_table.zs):
+    atomic_scales_dict = {}
+    for z in elementwise_targets.keys():
+        elementwise_targets[z] = np.concatenate(elementwise_targets[z])
         atomic_energies_dict[z] = np.mean(elementwise_targets[z])
-        atomic_scales.append((len(elementwise_targets[z]), np.std(elementwise_targets[z])))
-    # compute weighted average of scales with tuple element 0 ebing the weight and element 1 the value to average
-    scale = np.average([x[1] for x in atomic_scales], weights=[x[0] for x in atomic_scales])
-    return atomic_energies_dict #, scale
+        atomic_scales_dict[z] = np.std(elementwise_targets[z])
+
+    return atomic_energies_dict, atomic_scales_dict
 
 def save_dataset_as_HDF5(dataset: List, out_name: str) -> None:
     with h5py.File(out_name, "w") as f:

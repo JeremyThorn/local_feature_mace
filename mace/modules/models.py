@@ -457,14 +457,15 @@ class ScaleShiftMACE(MACE):
 class AtomicTargetsMACE(MACE):
     def __init__(
         self,
-        atomic_inter_scale: float,
-        atomic_inter_shift: float,
+        atomic_inter_scale: torch.Tensor,
+        atomic_inter_shift: torch.Tensor,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.scale_shift = ScaleShiftBlock(
-            scale=atomic_inter_scale, shift=atomic_inter_shift
-        )
+        self.register_buffer("atomic_inter_scale", atomic_inter_scale)
+        self.register_buffer("atomic_inter_shift", atomic_inter_shift)
+        #self.atomic_inter_scale = atomic_inter_scale
+        #self.atomic_inter_shift = atomic_inter_shift
 
     def forward(
         self,
@@ -527,7 +528,14 @@ class AtomicTargetsMACE(MACE):
         node_inter_es = torch.sum(
             torch.stack(node_es_list, dim=0), dim=0
         )  # [n_nodes, ]
-        node_inter_es = self.scale_shift(node_inter_es, node_heads)
+        #print(node_inter_es)
+        #scales = torch.matmul(data["node_attrs"], self.atomic_inter_scale)
+        #shifts = torch.matmul(data["node_attrs"], self.atomic_inter_shift)
+        #print(scales)
+        #print(shifts)
+        #node_inter_es = node_inter_es * scales + shifts
+        print(node_inter_es)
+        #node_inter_es = self.scale_shift(node_inter_es, node_heads)
 
         # Add E_0 and (scaled) interaction energy
         node_energy = node_inter_es
