@@ -452,6 +452,8 @@ def get_loss_fn(
     elif args.loss == "atomic_targets":
         assert dipole_only is False and targets_only is True
         loss_fn = modules.AtomicTargetsLoss(
+            shift=args.mean,
+            scale=args.std,
             huber_delta=args.huber_delta,
         )
     else:

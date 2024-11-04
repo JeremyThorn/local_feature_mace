@@ -529,12 +529,12 @@ class AtomicTargetsMACE(MACE):
             torch.stack(node_es_list, dim=0), dim=0
         )  # [n_nodes, ]
         #print(node_inter_es)
-        #scales = torch.matmul(data["node_attrs"], self.atomic_inter_scale)
-        #shifts = torch.matmul(data["node_attrs"], self.atomic_inter_shift)
+        scales = torch.matmul(data["node_attrs"], self.atomic_inter_scale)
+        shifts = torch.matmul(data["node_attrs"], self.atomic_inter_shift)
         #print(scales)
         #print(shifts)
-        #node_inter_es = node_inter_es * scales + shifts
-        print(node_inter_es)
+        node_inter_es = node_inter_es * scales + shifts
+        #print(node_inter_es)
         #node_inter_es = self.scale_shift(node_inter_es, node_heads)
 
         # Add E_0 and (scaled) interaction energy

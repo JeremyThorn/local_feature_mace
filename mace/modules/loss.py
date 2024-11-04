@@ -383,12 +383,18 @@ class WeightedEnergyForcesDipoleLoss(torch.nn.Module):
         )
 
 class AtomicTargetsLoss(torch.nn.Module):
-    def __init__(self, huber_delta=0.01) -> None:
+    def __init__(self, shift, scale, huber_delta=0.01) -> None:
         super().__init__()
         self.huber_loss = torch.nn.HuberLoss(reduction="mean", delta=huber_delta)
+        self.register_buffer("shift", torch.tensor(shift, dtype=torch.get_default_dtype()))
+        self.register_buffer("scale", torch.tensor(scale, dtype=torch.get_default_dtype()))
 
     def forward(self, ref: Batch, pred: TensorDict) -> torch.Tensor:
-        return self.huber_loss(ref["atomic_targets"], pred["atomic_targets"])*1e3
+        per_node_scale = ref["node_attrs"] @ self.scale
+        per_node_shift = ref["node_attrs"] @ self.shift
+        normalised_ref = (ref["atomic_targets"] - per_node_shift) / per_node_scale
+        normalised_pred = (pred["atomic_targets"] - per_node_shift) / per_node_scale
+        return self.huber_loss(normalised_ref, normalised_pred)*1e3
 
     def __repr__(self):
         return f"{self.__class__.__name__}(huber_delta={self.huber_loss.delta:.3f})"
